@@ -47,6 +47,14 @@ public class Rule {
 
     private double fitness;
 
+    @Override
+    public Rule clone() {
+        return new Rule(this.left, this.right1, this.right2, this.probability, this.count, this.countInNeighbourhoods,
+                this.countInPositives, this.positiveCount, this.negativeCount, this.positiveSumInsideOutsideUsages,
+                this.negativeSumInsideOutsideUsages, this.countInsideOutsideUsageProbability, this.countUsageInValidSentencesParsing,
+                this.countUsageInNotValidSentencesParsing, this.fitness);
+    }
+
     public Rule(Symbol left, Symbol right1, Symbol right2, double probability) {
         this.left = left;
         this.right1 = right1;
@@ -60,7 +68,7 @@ public class Rule {
 
     @Override
     public String toString() {
-        return left.toString() + " -> " + right1.toString() + (right2 != null ? " " + right2.toString() : "");
+        return left.toString() + " -> " + right1.toString() + (right2 != null ? " " + right2.toString() : "") + ": " + probability;
     }
 
     public String getDefinition() {
@@ -79,15 +87,15 @@ public class Rule {
         return positiveSumInsideOutsideUsages + negativeSumInsideOutsideUsages;
     }
 
-    public void addCount(double count){
+    public void addCount(double count) {
         this.count += count;
     }
 
-    public void addPositiveCount(double count){
+    public void addPositiveCount(double count) {
         this.positiveCount += count;
     }
 
-    public void addNegativeCount(double count){
+    public void addNegativeCount(double count) {
         this.negativeCount += count;
     }
 

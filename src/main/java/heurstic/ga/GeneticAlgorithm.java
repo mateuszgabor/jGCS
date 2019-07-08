@@ -28,10 +28,20 @@ public class GeneticAlgorithm implements Heuristic {
         if (random.nextDouble() <= configuration.getDouble(RUN_PROBABILITY)) {//probability of getting value less or equal to n equals n
             for (int i = 1; i < getNumberOfNewRules(); i++) {
                 List<Rule> rules = select(grammar);
+                List<Rule> copyRules = new ArrayList<>();
+                for (Rule r : rules) {
+                    copyRules.add(r.clone());
+                }
+                copyRules = rules.stream().map(Rule::clone).collect(Collectors.toList());
+
                 if (rules.size() == 2) {
-                    List<Rule> newRules = crossover(rules.get(0), rules.get(1));
+                    List<Rule> newRules = crossover(copyRules.get(0), copyRules.get(1));
+                    System.out.println("\nParent rules");
+                    System.out.println(newRules);
                     mutate(newRules, grammar);
                     invert(newRules);
+                    System.out.println("\nChildren rules:");
+                    System.out.println(newRules + "\n");
                     grammar.addNonTerminalRules(newRules);
                 }
             }
@@ -115,14 +125,14 @@ public class GeneticAlgorithm implements Heuristic {
             if (switchedSymbolIndex == 1) {
                 Symbol right11 = rule1.getRight1();
                 Symbol right12 = rule2.getRight1();
-                newRule1 = new Rule(rule1.getLeft(), right12, rule1.getRight2(), 1.0);
-                newRule2 = new Rule(rule2.getLeft(), right11, rule2.getRight2(), 1.0);
+                newRule1 = new Rule(rule1.getLeft(), right12, rule1.getRight2(), rule1.getProbability());
+                newRule2 = new Rule(rule2.getLeft(), right11, rule2.getRight2(), rule2.getProbability());
             }
             if (switchedSymbolIndex == 2) {
                 Symbol right21 = rule1.getRight2();
                 Symbol right22 = rule2.getRight2();
-                newRule1 = new Rule(rule1.getLeft(), rule1.getRight1(), right22, 1.0);
-                newRule2 = new Rule(rule2.getLeft(), rule2.getRight2(), right21, 1.0);
+                newRule1 = new Rule(rule1.getLeft(), rule1.getRight1(), right22, rule1.getProbability());
+                newRule2 = new Rule(rule2.getLeft(), rule2.getRight2(), right21, rule2.getProbability());
             }
             return Arrays.asList(newRule1, newRule2);
         }

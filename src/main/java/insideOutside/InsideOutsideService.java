@@ -57,16 +57,18 @@ public class InsideOutsideService {
         double velocityFactor = configuration.getDouble(CE_VELOCITY_FACTOR);
         grammar.getRules()
                 .stream()
-                .filter(r -> r.getPositiveCount() != 0 || r.getNegativeCount() != 0)
+//                .filter(r -> r.getPositiveCount() != 0 || r.getNegativeCount() != 0)
                 .forEach(rule -> {
 //                    LOGGER.info("Rule: {}", rule.toFullString());
                     double sumOfAllPositiveCountsWithLeftSymbol = sumAllPositiveCountsWithLeftSymbol(grammar, rule);
                     double newProbability = calculateNewProbability(rule, sumOfAllPositiveCountsWithLeftSymbol, mode);
-                    if (newProbability > 1e-5) {
+                    if (newProbability > 1e-4 && !Double.isNaN(newProbability)){
                         rule.setProbability(newProbability);
-                    } else {
-                        rule.setProbability(0);
+                    } else{
+                        newProbability = 0;
+                        rule.setProbability(newProbability);
                     }
+                    System.out.println(rule);
 //                    LOGGER.info("Rule: {}", rule.toFullString());
 //                    LOGGER.info("Probability: {}", newProbability);
 //                    LOGGER.info("CE: {}", ceFactor);
@@ -84,8 +86,14 @@ public class InsideOutsideService {
         double newProbability = 0;
         if (rule.getPositiveCount() != 0) {
             double denominator = sumAllPositiveCountsWithLeftSymbol;
-            if (mode != InductionMode.IO)
+            if (mode != InductionMode.IO) {
+                if (mode == InductionMode.IOCE_ALL || mode == InductionMode.IOCE_SAME_LENGTH) {
+                    double CE_FACTOR = rule.getCountInPositives() / (rule.getCountInPositives() + rule.getCountInNeighbourhoods());
+                    newProbability = (rule.getPositiveCount() / denominator) * CE_FACTOR;
+                    return newProbability;
+                }
                 denominator += rule.getCountInPositives() + rule.getCountInNeighbourhoods();
+            }
             newProbability = rule.getPositiveCount() / denominator;
         }
         return newProbability;
@@ -110,9 +118,10 @@ public class InsideOutsideService {
     public void updateCounts(Grammar grammar, double sentenceProbability, IoSequence sequence) {
         grammar.getRules().forEach(rule -> {
             LOGGER.debug("Calculating counts of {} with sentenceProbability {}", rule.getDefinition(), sentenceProbability);
-            if (sentenceProbability > Math.pow(10, -10)) {
+            if (sentenceProbability > 0) {
                 double relativeProbability = rule.getProbability() / sentenceProbability;
                 double newCount = relativeProbability * rule.getSumInsideOutsideUsages();
+//                System.out.println(rule + ", count: " + newCount);
                 rule.addCount(newCount);
                 rule.addPositiveCount(relativeProbability * rule.getPositiveSumInsideOutsideUsages());
                 rule.addNegativeCount(relativeProbability * rule.getNegativeSumInsideOutsideUsages());

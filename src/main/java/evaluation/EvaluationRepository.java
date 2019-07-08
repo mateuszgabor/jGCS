@@ -21,8 +21,8 @@ public class EvaluationRepository {
     }
 
     public void insert(int iteration, Evaluation evaluation) {
-        if (result.containsKey(iteration))
-            throw new ApplicationException(String.format("Matrix with iteration number %d already exists", iteration));
+//        if (result.containsKey(iteration))
+//            throw new ApplicationException(String.format("Matrix with iteration number %d already exists", iteration));
         result.put(iteration, evaluation);
     }
 

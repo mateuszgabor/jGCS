@@ -20,9 +20,14 @@ public class Symbol {
     private SymbolType symbolType;
 
     @Override
+    public Symbol clone() {
+        return new Symbol(new String(this.value), this.index, this.symbolType);
+    }
+
+    @Override
     public String toString() {
         if (symbolType == SymbolType.TERMINAL)
-            if(value.contains("'"))
+            if (value.contains("'"))
                 return "\"" + value + "\"";
             else
                 return "'" + value + "'";

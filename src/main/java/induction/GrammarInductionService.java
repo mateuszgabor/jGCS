@@ -64,18 +64,37 @@ public class GrammarInductionService {
         while (!stopConditionService.shouldStop()) {
             iteration++;
             final int iter = iteration;
+
             uiService.info("\nIteration: %d", iteration);
+            System.out.println("\nRules on start of iteration");
+            grammar.getRules()
+                    .stream()
+                    .forEach(rule -> {
+                        System.out.println(rule.toString());
+                    });
+
             executionTimeService.saveExecutionTime(ETM_HEURISTIC, () -> heuristicService.run(grammar, iter));
-            if (enableCovering) {
+            if (enableCovering && iteration == 1) {
+                System.out.println("Covering");
                 ioDataset.getSequences().forEach(ioSequence -> executionTimeService.saveExecutionTime(ETMC_SEQUENCE, () -> {
                     executionTimeService.saveExecutionTime(ETMC_CYK,
                             () -> cykService.runCyk(ioSequence.getSequence(), grammar, ioSequence.getSequence().isPositive()));
                 }));
             }
+
+            correctionService.removeDuplicatedRules(grammar);
+
+            System.out.println("Rules after genetic");
+            grammar.getRules()
+                    .stream()
+                    .forEach(rule -> {
+                        System.out.println(rule.toString());
+                    });
+
             for (int i = 0; i < trainIterations; i++) {
                 final int trainIter = i;
                 executionTimeService.saveExecutionTime(ETMC_ITERATION, () -> {
-                    uiService.state("Train iteration: %d", trainIter + 1);
+                    uiService.state("\nTrain iteration: %d \n", trainIter + 1);
                     insideOutsideService.resetInsideOutsideValuesAndCounts(grammar);
                     ioDataset.getSequences().forEach(ioSequence -> executionTimeService.saveExecutionTime(ETMC_SEQUENCE, () -> {
                         insideOutsideService.resetInsideOutsideValues(grammar);
@@ -83,14 +102,15 @@ public class GrammarInductionService {
                         fitnessService.countRulesUsage(ioSequence.getSequence(), cykResult, grammar);
                         executionTimeService.saveExecutionTime(ETMC_IO_COUNTS, () -> insideOutsideService.updateRulesCounts(grammar, cykResult, ioSequence));
                     }));
-                    correctionService.removeDuplicatedRules(grammar);
+                    evaluationService.saveEvaluation(trainIter, () -> executionTimeService.saveExecutionTime(ETMC_EVALUATION,
+                            () -> evaluationService.evaluateDataset(testDataset, grammar)));
                     executionTimeService.saveExecutionTime(ETMC_IO_PROBABILITIES, () -> insideOutsideService.updateRulesProbabilities(grammar));
                 });
             }
             executionTimeService.saveExecutionTime(ETMC_REMOVING_RULES, () -> correctionService.removeZeroProbabilitiesRules(grammar));
             fitnessService.countRulesFitness(grammar);
-            evaluationService.saveEvaluation(iter, () -> executionTimeService.saveExecutionTime(ETMC_EVALUATION,
-                    () -> evaluationService.evaluateDataset(testDataset, grammar)));
+//            evaluationService.saveEvaluation(iter, () -> executionTimeService.saveExecutionTime(ETMC_EVALUATION,
+//                    () -> evaluationService.evaluateDataset(testDataset, grammar)));
         }
         executionTimeService.saveExecutionTime(ETMC_CORRECTION, () -> correctionService.correctGrammar(grammar));
         uiService.closeState();

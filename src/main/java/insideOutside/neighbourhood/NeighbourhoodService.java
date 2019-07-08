@@ -79,6 +79,10 @@ public class NeighbourhoodService {
         switch (mode) {
             case IO:
                 return new NoNeighbourhoodBuilder();
+            case IOCE_ALL:
+                return new FullNeighbourhoodBuilder(negatives, configuration.getBoolean(CE_RADNOM_NEIGHBOURHOODS));
+            case IOCE_SAME_LENGTH:
+                return new SameLengthNeighbourhoodBuilder(negatives, configuration.getBoolean(CE_RADNOM_NEIGHBOURHOODS));
             case CE_SAME_LENGTH:
                 return new SameLengthNeighbourhoodBuilder(negatives, configuration.getBoolean(CE_RADNOM_NEIGHBOURHOODS));
             case CE_ALL:

@@ -48,6 +48,10 @@ public class EvaluationService {
             CykResult cykResult = cykService.runCyk(sequence, grammar, false);
             confusionMatrix.update(sequence.isPositive(), cykResult.isParsed());
         });
+        System.out.println("\nSensitivity: " + confusionMatrix.getSensitivity());
+        System.out.println("Specificity: " + confusionMatrix.getSpecificity());
+        System.out.println("Precision: " + confusionMatrix.getPrecision());
+        System.out.println("F1: " + confusionMatrix.getF1() + "\n");
         return new Evaluation(grammarIoService.writeGrammar(grammar), grammar.getRules().size(), confusionMatrix);
     }
 
