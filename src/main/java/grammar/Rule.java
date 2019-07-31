@@ -45,6 +45,12 @@ public class Rule {
 
     private int countUsageInNotValidSentencesParsing;
 
+    private double profit;
+
+    private double debt;
+
+    private double fertility;
+
     private double fitness;
 
     @Override
@@ -52,7 +58,7 @@ public class Rule {
         return new Rule(this.left, this.right1, this.right2, this.probability, this.count, this.countInNeighbourhoods,
                 this.countInPositives, this.positiveCount, this.negativeCount, this.positiveSumInsideOutsideUsages,
                 this.negativeSumInsideOutsideUsages, this.countInsideOutsideUsageProbability, this.countUsageInValidSentencesParsing,
-                this.countUsageInNotValidSentencesParsing, this.fitness);
+                this.countUsageInNotValidSentencesParsing, this.profit, this.debt, this.fertility, this.fitness);
     }
 
     public Rule(Symbol left, Symbol right1, Symbol right2, double probability) {

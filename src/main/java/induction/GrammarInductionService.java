@@ -91,6 +91,7 @@ public class GrammarInductionService {
                         System.out.println(rule.toString());
                     });
 
+            fitnessService.resetRulesUsagesDebtsProfits(grammar);
             for (int i = 0; i < trainIterations; i++) {
                 final int trainIter = i;
                 executionTimeService.saveExecutionTime(ETMC_ITERATION, () -> {
@@ -99,7 +100,8 @@ public class GrammarInductionService {
                     ioDataset.getSequences().forEach(ioSequence -> executionTimeService.saveExecutionTime(ETMC_SEQUENCE, () -> {
                         insideOutsideService.resetInsideOutsideValues(grammar);
                         CykResult cykResult = executionTimeService.saveExecutionTime(ETMC_CYK, () -> cykService.runCyk(ioSequence.getSequence(), grammar, false));
-                        fitnessService.countRulesUsage(ioSequence.getSequence(), cykResult, grammar);
+                        fitnessService.countRulesUsage(ioSequence.getSequence(),cykResult, grammar);
+                        fitnessService.fillDebtsProfits(ioSequence.getSequence(), ioSequence.isPositive(), cykResult);
                         executionTimeService.saveExecutionTime(ETMC_IO_COUNTS, () -> insideOutsideService.updateRulesCounts(grammar, cykResult, ioSequence));
                     }));
                     evaluationService.saveEvaluation(trainIter, () -> executionTimeService.saveExecutionTime(ETMC_EVALUATION,
@@ -108,7 +110,8 @@ public class GrammarInductionService {
                 });
             }
             executionTimeService.saveExecutionTime(ETMC_REMOVING_RULES, () -> correctionService.removeZeroProbabilitiesRules(grammar));
-            fitnessService.countRulesFitness(grammar);
+//            fitnessService.countRulesFitness(grammar);
+            fitnessService.countClassicRulesFitness(grammar);
 //            evaluationService.saveEvaluation(iter, () -> executionTimeService.saveExecutionTime(ETMC_EVALUATION,
 //                    () -> evaluationService.evaluateDataset(testDataset, grammar)));
         }
